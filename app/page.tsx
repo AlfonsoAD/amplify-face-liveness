@@ -7,6 +7,7 @@ import "./../app/app.css";
 import { Amplify } from "aws-amplify";
 import outputs from "@/amplify_outputs.json";
 import "@aws-amplify/ui-react/styles.css";
+import { LivenessQuickStartReact } from "./components/LivenessQuickStartReact";
 
 Amplify.configure(outputs);
 
@@ -33,7 +34,9 @@ export default function App() {
 
   return (
     <main>
-      <h1>My todos</h1>
+      <LivenessQuickStartReact />
+
+      {/* <h1>My todos</h1>
       <button onClick={createTodo}>+ new</button>
       <ul>
         {todos.map((todo) => (
@@ -46,7 +49,7 @@ export default function App() {
         <a href="https://docs.amplify.aws/nextjs/start/quickstart/nextjs-app-router-client-components/">
           Review next steps of this tutorial.
         </a>
-      </div>
+      </div> */}
     </main>
   );
 }
