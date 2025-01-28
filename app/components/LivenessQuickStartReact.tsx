@@ -2,6 +2,22 @@
 import React from "react";
 import { FaceLivenessDetector } from "@aws-amplify/ui-react-liveness";
 import { Loader, ThemeProvider } from "@aws-amplify/ui-react";
+import "@aws-amplify/ui-react/styles.css";
+
+const dictionary = {
+  // use default strings for english
+  en: null,
+  es: {
+    photosensitivyWarningHeadingText: "Advertencia de fotosensibilidad",
+    photosensitivyWarningBodyText:
+      "Esta verificación muestra luces de colores. Tenga cuidado si es fotosensible.",
+    goodFitCaptionText: "Buen ajuste",
+    tooFarCaptionText: "Demasiado lejos",
+    hintCenterFaceText: "Centra tu cara",
+    startScreenBeginCheckText: "Comenzar a verificar",
+    backButtonText: "Atrás",
+  },
+};
 
 export function LivenessQuickStartReact() {
   const [loading, setLoading] = React.useState<boolean>(true);
@@ -76,45 +92,61 @@ export function LivenessQuickStartReact() {
      */
   };
 
+  // const resetResults = () => {
+  //   setResults({
+  //     confidence: 0,
+  //     isLive: false,
+  //     status: "",
+  //   });
+  // };
+
   return (
     <ThemeProvider>
-      {loading ? (
-        <Loader />
+      {loading && <Loader />}
+
+      {!loading && results.confidence == 0 && results.status === "" ? (
+        <main>
+          {loading ? (
+            <Loader />
+          ) : (
+            <FaceLivenessDetector
+              sessionId={createLivenessApiData!.sessionId}
+              region="us-east-1"
+              onAnalysisComplete={handleAnalysisComplete}
+              onError={(error) => {
+                console.error(error);
+              }}
+            />
+          )}
+        </main>
       ) : (
-        <FaceLivenessDetector
-          sessionId={createLivenessApiData!.sessionId}
-          region="us-east-1"
-          onAnalysisComplete={handleAnalysisComplete}
-          onError={(error) => {
-            console.error(error);
-          }}
-        />
-      )
-    }
-
-    {
-      results.isLive && results.status === "SUCCEEDED" ? (
         <div className="flex flex-col items-center justify-center gap-4 font-semibold bg-gray-300">
           <h1>Face Liveness Detection</h1>
-          <p className="font-bold text-green">Is Live</p>
+          <p className="font-bold text-green">
+            {" "}
+            {results.isLive
+              ? "Está vivo"
+              : "No se pudo comprobar la viveza"}{" "}
+          </p>
           <h2>Session ID: {createLivenessApiData?.sessionId}</h2>
           <h2>Status: {results.status}</h2>
-          <h2  className={ results.confidence > 90.00 ? `text-green-500`:`text-red` +`font-bold` }  >Confidence Score: {results.confidence.toFixed(2)}%</h2>
-          <button onClick={() => window.location.reload()}>Try Again</button>
+          <h2
+            className={
+              results.confidence > 90.0
+                ? `text-green-500`
+                : `text-red` + `font-bold`
+            }
+          >
+            Confidence Score: {results.confidence.toFixed(2)}%
+          </h2>
+          <button
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </button>
         </div>
-      ): !results.isLive && (
-        <div className="flex flex-col items-center justify-center gap-4 font-semibold bg-gray-300">
-          <h1>Face Liveness Detection</h1>
-          <p className="font-bold text-red">Is Not Live</p>
-          <h2>Session ID: {createLivenessApiData?.sessionId}</h2>
-          <h2>Status: {results.status}</h2>
-           <h2  className={ results.confidence > 90.00 ? `text-green-500`:`text-red` +`font-bold` }  >Confidence Score: {results.confidence.toFixed(2)}%</h2>
-           <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => window.location.reload()}>Try Again</button>
-        </div>
-      )
-    }
-
-      
+      )}
     </ThemeProvider>
   );
 }
