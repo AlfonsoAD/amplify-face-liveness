@@ -8,7 +8,15 @@ export function LivenessQuickStartReact() {
   const [createLivenessApiData, setCreateLivenessApiData] = React.useState<{
     sessionId: string;
   } | null>(null);
-  const [isLive, setIsLive] = React.useState<boolean | null>(null);
+  const [results, setResults] = React.useState<{
+    confidence: number;
+    isLive: boolean;
+    status: string;
+  }>({
+    confidence: 0,
+    isLive: false,
+    status: "",
+  });
 
   React.useEffect(() => {
     const fetchCreateLiveness = async () => {
@@ -35,7 +43,6 @@ export function LivenessQuickStartReact() {
         setCreateLivenessApiData(results);
         setLoading(false);
       } catch (err) {
-        console.error("Error al crear sesión de liveness:", err);
         alert(
           "Hubo un problema al crear la sesión de liveness. Intenta de nuevo."
         );
@@ -58,7 +65,7 @@ export function LivenessQuickStartReact() {
 
     const { results } = data;
 
-    console.log("Response of GetFaceLivenessSession", results);
+    setResults(results);
 
     /*
      * Note: The isLive flag is not returned from the GetFaceLivenessSession API
@@ -67,17 +74,6 @@ export function LivenessQuickStartReact() {
      * Any next steps from an authorization perspective should happen in your backend and you should not rely
      * on this value for any auth related decisions.
      */
-    if (results.isLive) {
-      console.log("User is live");
-      setIsLive(true);
-
-      // Here you can call your backend API to authorize the user
-
-      alert("User is live");
-    } else {
-      console.log("User is not live");
-      setIsLive(false);
-    }
   };
 
   return (
@@ -93,22 +89,32 @@ export function LivenessQuickStartReact() {
             console.error(error);
           }}
         />
-      )}
+      )
+    }
 
-      {isLive !== null && (
-        <div
-          style={{
-            marginTop: "20px",
-            padding: "10px",
-            textAlign: "center",
-            color: isLive ? "green" : "red",
-            border: "1px solid",
-            borderRadius: "8px",
-          }}
-        >
-          {isLive ? "User is live" : "User is not live"}
+    {
+      results.isLive && results.status === "SUCCEEDED" ? (
+        <div className="flex flex-col items-center justify-center gap-4 font-semibold bg-gray-300">
+          <h1>Face Liveness Detection</h1>
+          <p className="font-bold text-green">Is Live</p>
+          <h2>Session ID: {createLivenessApiData?.sessionId}</h2>
+          <h2>Status: {results.status}</h2>
+          <h2  className={ results.confidence > 90.00 ? `text-green-500`:`text-red` +`font-bold` }  >Confidence Score: {results.confidence.toFixed(2)}%</h2>
+          <button onClick={() => window.location.reload()}>Try Again</button>
         </div>
-      )}
+      ): !results.isLive && (
+        <div className="flex flex-col items-center justify-center gap-4 font-semibold bg-gray-300">
+          <h1>Face Liveness Detection</h1>
+          <p className="font-bold text-red">Is Not Live</p>
+          <h2>Session ID: {createLivenessApiData?.sessionId}</h2>
+          <h2>Status: {results.status}</h2>
+           <h2  className={ results.confidence > 90.00 ? `text-green-500`:`text-red` +`font-bold` }  >Confidence Score: {results.confidence.toFixed(2)}%</h2>
+           <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => window.location.reload()}>Try Again</button>
+        </div>
+      )
+    }
+
+      
     </ThemeProvider>
   );
 }
